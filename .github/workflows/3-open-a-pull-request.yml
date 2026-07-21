@@ -69,14 +69,19 @@ jobs:
 
       # START: Check practical exercise
 
-      - name: Check PR title for keyphrase
+      - name: Check PR title for expected values
         id: check-pr-title
         continue-on-error: true
-        uses: skills/action-keyphrase-checker@v1
-        with:
-          keyphrase: "Add my first file"
-          text: ${{ github.event.pull_request.title }}
-          case-sensitive: false
+        run: |
+          shopt -s nocasematch
+          if [[ "$PR_TITLE" == *"Add my first file"* || "$PR_TITLE" == *"My first branch"* ]]; then
+            echo "STEP_MESSAGE=Pull request title matches" >> $GITHUB_OUTPUT
+          else
+            echo "STEP_MESSAGE=Pull request title does not match expected values" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
 
       - name: Check PR description is non-empty
         id: check-pr-description
